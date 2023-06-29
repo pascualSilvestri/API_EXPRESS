@@ -1,9 +1,14 @@
 import express from 'express'
 import routerMusica from './routers/musica.routers.js';
 import routerArtista from './routers/artistas.routers.js';
+import cors from 'cors'
 
 
 const app = express()
+
+app.use(cors({
+    origin: 'http://localhost:5173/'
+  }));
 
 app.use(express.json())
 
