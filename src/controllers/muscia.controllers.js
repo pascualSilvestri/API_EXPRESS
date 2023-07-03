@@ -3,21 +3,33 @@ import { pool } from '../db.js'
 
 export const getMusica = async (req, res) => {
     try {
-
-        const result = await pool.query('select * from musica')
-        res.json(result[0])
+      const result = await pool.query('SELECT * FROM musica');
+  
+      const promises = result[0].map(async (e) => {
+        const [row] = await pool.query('SELECT * FROM artista WHERE id = ?', [e.artista_id]);
+        e.artista_id = row;
+        return e;
+      });
+  
+      const updatedResult = await Promise.all(promises);
+  
+      console.log(updatedResult); // Imprime el resultado actualizado
+  
+      res.json(updatedResult);
     } catch (error) {
-        return res.status(500).json({
-            messaje:'Mensaje de error'
-        })
+      return res.status(500).json({
+        message: 'Mensaje de error',
+      });
     }
-
-}
+  };
+  
 
 export const getMusicaById = async (req, res) => {
     try {
         const id = req.params.id
         const [rows] = await pool.query(`select * from musica where id = ? ;`, [id])
+        const[row] = await pool.query(`select * from artista where id = ?`,[rows[0].artista_id])
+        rows[0].artista_id = row
         if (rows.length <= 0) return res.status(404).json({ messaje: "Musica no encontrado" })
 
 
